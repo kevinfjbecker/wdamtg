@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+
+    <meta charset="utf-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="http://getbootstrap.com/dist/css/bootstrap.css" rel="stylesheet" type="text/css" />
+
+    <title>wdamtg</title>
+  
+<style id="jsbin-css">
+  
+body {
+  padding-top: 70px;
+}
+
+.running-action {
+  padding-left: 20px;
+}
+
+input[type='text'], textarea {
+  font-size: 16px;
+}
+
+svg {
+  border: solid 1px #aaa;
+}
+</style>
+
+
+<style id="jsbin-css">
+body {
+  padding-top: 70px;
+}
+
+.running-action {
+  padding-left: 20px;
+}
+
+input[type='text'], textarea {
+  font-size: 16px;
+}
+
+svg {
+  border: solid 1px #aaa;
+}
+</style>
+</head>
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">wdamtg</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="navbar-collapse">
+          <ul id="page-links" class="nav navbar-nav">
+            <!-- javascript generated -->
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
+    
+    <div id="splash-page" class="container page">
+      <div class="jumbotron">
+        <h1>WDAMTG</h1>
+        <p>Where did all my time go?</p>
+      </div>
+      <h4>Find out.</h4>
+      <p>Leverage your awareness. See where your time is going.</p>
+    </div><!-- /.page#splash-page -->
+    
+    <div id="quick-add" class="container page hidden">
+      <div class="input-group">
+        <div class="input-group-btn">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Activity
+            <span class="caret"></span></button>
+          <ul id="activity-chooser" class="dropdown-menu">
+            <!-- javascript generated -->
+          </ul>
+        </div><!-- /btn-group -->
+        <input id="activity-to-start" type="text" class="form-control">
+        <span class="input-group-btn">
+          <button id="start-activity" class="btn btn-default" type="button">
+            <span class="glyphicon glyphicon-play"></span>
+          </button>
+        </span><!-- /btn-group -->
+      </div><!-- /input-group -->
+
+      <ul id="running-activities" class="list-group">
+        <!-- javascript generated -->
+      </ul>
+    </div><!-- /.page#quick-add -->
+
+    <div id="log-editor" class="container page hidden">
+      <!-- Modal -->
+      <div class="modal fade" id="log-editor-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+              <h4 class="modal-title" id="log-modal-activity">Activity</h4>
+            </div>
+            <div class="modal-body">
+
+              <form class="form-inline" role="form">
+                <input type='hidden' id='log-modal-activity-index' value='-1'>
+                <div class="form-group">
+                  <label class="sr-only" for="start-time-input">Start Time</label>
+                  <input type="text" class="form-control" id="log-modal-start-time" placeholder="HH:MM">
+                </div>
+                <div class="form-group">
+                  <label class="sr-only" for="end-time-inpu">End Time</label>
+                  <input type="text" class="form-control" id="log-modal-end-time" placeholder="HH:MM">
+                </div>
+              </form>
+              
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary" id="log-modal-save-changes">Save changes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /.page#log-editor -->
+    
+    <div id="data-viewer" class="container page hidden">TODO =)</div><!-- /.page#data-viewer -->
+
+    <script src="http://code.jquery.com/jquery.min.js"></script>
+    <script src="http://getbootstrap.com/dist/js/bootstrap.js"></script>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+// wdamtg /////////////////////////////////////////////////////////////////////
+
+var appData;
+
+// check storage
+//if(localStorage && localStorage.getItem('gagev')) {
+//  appData = JSON.parse(localStorage.getItem('gagev'));
+//  output = 'Retrieved App Data';
+//} else {
+appData = {
+  appPages: [
+    {linkText:'Quick Add', pageID: 'quick-add', isActive: false},
+    {linkText:'Log Editor', pageID: 'log-editor', isActive: false},
+    {linkText:'Viewer', pageID: 'data-viewer', isActive: false}
+  ],
+  activityChoices: [
+    'Watching TV',
+    'Reading',
+    'Playing Games'
+  ],
+  runningActivities: [
+    {activity: 'Coding', start: mockTime(18,30).toJSON()},
+    {activity: 'Surfing', start: mockTime(18,30).toJSON()},
+    {activity: 'Breathing', start: mockTime(18,30).toJSON()}
+  ],
+  activityLog: [
+    {
+      activity: 'Working',
+      start: new mockTime(9,30).toJSON(),
+      end: new mockTime(17,30).toJSON()
+    },
+    {
+      activity: 'Geting Ready',
+      start: mockTime(7,15).toJSON(),
+      end: mockTime(8,30).toJSON()
+    }
+  ]
+};
+localStorage.setItem('gagev', JSON.stringify(appData));
+//}
+
+function mockTime(h,m,s,ms) {
+  var d = todaysDate();
+  d.setHours(h||0,m||0,s||0,ms||0);
+  return d;
+}
+
+// activity color map
+var color = d3.scale.category20();
+
+///////////////////////////////////////////////////////////////////// navbar //
+
+d3.select('.navbar-brand').on('click', function () {
+
+  appData.appPages.forEach(function (p) {
+    p.isActive = false;
+  });
+  updateNavLinkActiveHighlighting();
+
+  d3.selectAll('.page').style('display', 'none');
+  d3.select('#splash-page')
+  .classed('hidden', false)
+  .style('display', 'block');
+
+});
+
+var pagelinks = d3.select('#page-links').selectAll('li')
+.data(appData.appPages);
+
+pagelinks.enter()
+.append('li')
+.classed('active', function (d) { return d.isActive; })
+.on('click', activatePage)
+.append('a')
+.attr('href', '#')
+.text(function (d) { return d.linkText; });
+
+function activatePage(d) {
+
+  if(!d) { return; }
+
+  appData.appPages.forEach(function (p) {
+    p.isActive = p.pageID === d.pageID;
+  });
+
+  updateNavLinkActiveHighlighting();
+
+  d3.selectAll('.page').style('display', 'none');
+  d3.select('#'+d.pageID)
+  .classed('hidden', false)
+  .classed('active', true)
+  .style('display', 'block');
+
+  if(d.pageID === 'log-editor') {
+    logEditorSetSvgSizeAndDoLayout();
+  } else if (d.pageID === 'quick-add') {
+    bindRunningActivityList();
+  }
+
+}
+
+function updateNavLinkActiveHighlighting() {
+  d3.select('#page-links').selectAll('li').classed('active', function (d) {
+    return d.isActive;
+  });
+}
+
+////////////////////////////////////////////////////////////////// quick-add //
+
+/*
+ *  generate dropdown
+ */
+d3.select('#activity-chooser').selectAll('li')
+.data(appData.activityChoices)
+.enter().append('li')
+.append('a')
+.attr('href', '#')
+.text(function(d){ return d; })
+.on('click', function(d){
+  activityInputKludge(d, '#activity-to-start');
+});
+
+d3.select('#start-activity').on('click', function () {
+  if(!activityInputKludge(undefined, '#activity-to-start')) {
+    return;
+  }
+  appData.runningActivities.push({
+    activity: activityInputKludge(undefined, '#activity-to-start'),
+    start: new Date().toJSON()
+  });
+  bindRunningActivityList();
+  activityInputKludge(null, '#activity-to-start');
+  localStorage.setItem('gagev', JSON.stringify(appData));
+});
+
+function bindRunningActivityList() {
+
+  var runningActivities = d3.select('#running-activities').selectAll('li')
+  .data(appData.runningActivities, function (d) { // id function
+    return d.activity;
+  }),
+
+      noobs = runningActivities.enter().append('li')
+  .classed('list-group-item', true);
+
+  noobs.append('button')
+  .attr('type', 'button')
+  .classed('btn', true)
+  .classed('btn-default', true)
+  .classed('btn-xs', true)
+  .on('click', function (d) {
+    var a = appData.runningActivities,
+        activity = a.splice(a.indexOf(d), 1)[0];
+    activity.end = new Date().toJSON();
+    appData.activityLog.push(activity);
+    bindRunningActivityList();
+    localStorage.setItem('gagev', JSON.stringify(appData));
+  })
+  .append('span')
+  .classed('glyphicon', true)
+  .classed('glyphicon-stop', true);
+
+  noobs.append('span')
+  .classed('running-action', true)
+  .text(function(d){ return d.activity; });
+
+  noobs.append('a')
+  .classed('close', true)
+  .text('x')
+  .on('click', cancelRunningActivity);
+
+  runningActivities.exit().remove();
+
+}
+
+function cancelRunningActivity(d) {
+  var a = appData.runningActivities;
+  a.splice(a.indexOf(d), 1);
+  bindRunningActivityList();
+  localStorage.setItem('gagev', JSON.stringify(appData));
+}
+
+///////////////////////////////////////////////////////////////// log-editor //
+
+$(window).on('resize', logEditorSetSvgSizeAndDoLayout);
+
+function logEditorSetSvgSizeAndDoLayout(){
+  var w = $('#log-editor').width();
+  if (w < 1) { return; }
+  svg.attr('width', w);
+  layout(w);
+}
+
+var cellHeight = 12,
+    w = 285,
+    h = 48 * cellHeight;
+var svg = d3.select('#log-editor')
+.append('svg')
+.attr('width', w)
+.attr('height', h);
+
+var y = d3.time.scale()
+.domain([todaysDate(), tomorrowsDate()])
+.range([0, h]);
+
+function layout () {
+
+  var w = svg.attr('width'),
+      h = svg.attr('height'),
+      slotWidth = 150;
+
+  var grid = svg.selectAll('line')
+  .data(d3.range(47));
+
+  grid.enter().append('line')
+  .style('stroke', function(d){
+    if(d===23) {
+      return '#aaa';
+    }
+    return d % 2 === 0 ? '#eee' : '#ddd';
+  });
+
+  grid.attr('x1', 0)
+  .attr('y1', function(d, i){return (i+1) * cellHeight;})
+  .attr('x2', w)
+  .attr('y2', function(d, i){return (i+1) * cellHeight;});
+
+  var timeSlots = svg.selectAll('rect')
+  .data(appData.activityLog);
+
+  timeSlots.enter().append('rect')
+  .attr('rx', 3)
+  .attr('ry', 3)
+  .attr('width', slotWidth)
+  .style('stroke-width', 2)
+  .on('click', function(d, i){
+    var f = d3.time.format('%H:%M');
+    $('#log-modal-activity-index').val(i);
+    $('#log-modal-activity').text(d.activity);
+    $('#log-modal-start-time').val(f(new Date(d.start)));
+    $('#log-modal-end-time').val(f(new Date(d.end)));
+    $('#log-editor-modal').modal();
+  });
+
+  timeSlots.attr('x', w / 2 - slotWidth / 2)
+  .attr('y', function (d) { return y(new Date(d.start)); })
+  .style('fill', function (d) { return d3.rgb(color(d.activity)).brighter(1); })
+  .style('stroke', function (d) { return d3.rgb(color(d.activity)).darker(1); })  
+  .attr('height', function (d) {
+    return y(new Date(d.end)) - y(new Date(d.start));
+  });
+
+}
+
+$('#log-modal-save-changes').click(function(){
+
+  var i = $('#log-modal-activity-index').val(),
+      activity = $('#log-modal-activity').text(),
+      start = $('#log-modal-start-time').val(),
+      end = $('#log-modal-end-time').val(),
+      startHM = /(\d{2})\:(\d{2})/.exec(start),
+      endHM = /(\d{2})\:(\d{2})/.exec(end),
+      startTime = new Date(appData.activityLog[i].start),
+      endTime = new Date(appData.activityLog[i].end);
+
+  startTime.setHours(startHM[1], startHM[2], 0, 0);
+  endTime.setHours(endHM[1], endHM[2], 0, 0);
+
+  appData.activityLog[i] = {
+    activity: activity,
+    start: startTime.toJSON(),
+    end: endTime.toJSON()
+  };
+
+  layout();
+
+});
+
+function updatedLogTime() {
+  // todo
+}
+
+function todaysDate() {
+  var d = new Date();
+  d.setHours(0,0,0,0);
+  return d;
+}
+
+function tomorrowsDate() {
+  var d = todaysDate();
+  d.setDate(d.getDate() + 1);
+  return d;
+}
+
+///////////////////////////////////////////////////////////////////// kudges //
+
+function activityInputKludge(s, inputSelector) {
+  var input = d3.select(inputSelector);
+  if(s === undefined) {
+    return input[0][0].value || input.attr('value');
+  }
+  input.attr('value', s);
+  input[0][0].value = s;
+}
+
+// roll up mobile nav menu
+$('.nav a').on('click', function(){
+  if($(".navbar-toggle").is(":visible")) {
+    $(".navbar-toggle").click();
+  }
+});
+
+/////////////////////////////////////////////////////////////////////// init //
+
+activatePage(appData.appPages.filter(function (d) { return d.isActive; })[0]);
+
+///////////////////////////////////////////////////////////////////////////////
+</script>
+</body>
+</html>
