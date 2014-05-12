@@ -145,46 +145,46 @@ svg {
     <script src="http://d3js.org/d3.v3.min.js"></script>
 
 <script>
+
 // wdamtg /////////////////////////////////////////////////////////////////////
 
 var appData;
 
 // check storage
-//if(localStorage && localStorage.getItem('gagev')) {
-//  appData = JSON.parse(localStorage.getItem('gagev'));
-//  output = 'Retrieved App Data';
-//} else {
-appData = {
-  appPages: [
-    {linkText:'Quick Add', pageID: 'quick-add', isActive: false},
-    {linkText:'Log Editor', pageID: 'log-editor', isActive: false},
-    {linkText:'Viewer', pageID: 'data-viewer', isActive: false}
-  ],
-  activityChoices: [
-    'Watching TV',
-    'Reading',
-    'Playing Games'
-  ],
-  runningActivities: [
-    {activity: 'Coding', start: mockTime(18,30).toJSON()},
-    {activity: 'Surfing', start: mockTime(18,30).toJSON()},
-    {activity: 'Breathing', start: mockTime(18,30).toJSON()}
-  ],
-  activityLog: [
-    {
-      activity: 'Working',
-      start: new mockTime(9,30).toJSON(),
-      end: new mockTime(17,30).toJSON()
-    },
-    {
-      activity: 'Geting Ready',
-      start: mockTime(7,15).toJSON(),
-      end: mockTime(8,30).toJSON()
-    }
-  ]
-};
-localStorage.setItem('gagev', JSON.stringify(appData));
-//}
+if(localStorage && localStorage.getItem('kevinfjbecker/wdamtg/appData')) {
+  appData = JSON.parse(localStorage.getItem('kevinfjbecker/wdamtg/appData'));
+} else {
+  appData = {
+    appPages: [
+      {linkText:'Quick Add', pageID: 'quick-add', isActive: false},
+      {linkText:'Log Editor', pageID: 'log-editor', isActive: false},
+      {linkText:'Viewer', pageID: 'data-viewer', isActive: false}
+    ],
+    activityChoices: [
+      //'Watching TV',
+      //'Reading',
+      //'Playing Games'
+    ],
+    runningActivities: [
+      //{activity: 'Coding', start: mockTime(18,30).toJSON()},
+      //{activity: 'Surfing', start: mockTime(18,30).toJSON()},
+      //{activity: 'Breathing', start: mockTime(18,30).toJSON()}
+    ],
+    activityLog: [
+      //{
+      //  activity: 'Working',
+      //  start: new mockTime(9,30).toJSON(),
+      //  end: new mockTime(17,30).toJSON()
+      //},
+      //{
+      //  activity: 'Geting Ready',
+      //  start: mockTime(7,15).toJSON(),
+      //  end: mockTime(8,30).toJSON()
+      //}
+    ]
+  };
+  localStorage.setItem('kevinfjbecker/wdamtg/appData', JSON.stringify(appData));
+}
 
 function mockTime(h,m,s,ms) {
   var d = todaysDate();
@@ -242,8 +242,10 @@ function activatePage(d) {
     logEditorSetSvgSizeAndDoLayout();
   } else if (d.pageID === 'quick-add') {
     bindRunningActivityList();
+    bindActivityChooserDropdown();
   }
 
+  localStorage.setItem('kevinfjbecker/wdamtg/appData', JSON.stringify(appData));
 }
 
 function updateNavLinkActiveHighlighting() {
@@ -254,31 +256,42 @@ function updateNavLinkActiveHighlighting() {
 
 ////////////////////////////////////////////////////////////////// quick-add //
 
-/*
- *  generate dropdown
- */
-d3.select('#activity-chooser').selectAll('li')
-.data(appData.activityChoices)
-.enter().append('li')
-.append('a')
-.attr('href', '#')
-.text(function(d){ return d; })
-.on('click', function(d){
-  activityInputKludge(d, '#activity-to-start');
-});
-
 d3.select('#start-activity').on('click', function () {
-  if(!activityInputKludge(undefined, '#activity-to-start')) {
+
+  var activity = activityInputKludge(undefined, '#activity-to-start');
+  
+  if(!activity) {
     return;
   }
+
   appData.runningActivities.push({
-    activity: activityInputKludge(undefined, '#activity-to-start'),
+    activity: activity,
     start: new Date().toJSON()
   });
+  
+  if(appData.activityChoices.indexOf(activity) === -1) {
+	  appData.activityChoices.push(activity);
+  }
+
   bindRunningActivityList();
+  bindActivityChooserDropdown();
+  
   activityInputKludge(null, '#activity-to-start');
-  localStorage.setItem('gagev', JSON.stringify(appData));
+  
+  localStorage.setItem('kevinfjbecker/wdamtg/appData', JSON.stringify(appData));
 });
+
+function bindActivityChooserDropdown() {
+  d3.select('#activity-chooser').selectAll('li')
+      .data(appData.activityChoices)
+    .enter().append('li')
+      .append('a')
+      .attr('href', '#')
+      .text(function(d){ return d; })
+      .on('click', function(d){
+        activityInputKludge(d, '#activity-to-start');
+      });
+}
 
 function bindRunningActivityList() {
 
@@ -287,7 +300,7 @@ function bindRunningActivityList() {
     return d.activity;
   }),
 
-      noobs = runningActivities.enter().append('li')
+  noobs = runningActivities.enter().append('li')
   .classed('list-group-item', true);
 
   noobs.append('button')
@@ -301,7 +314,7 @@ function bindRunningActivityList() {
     activity.end = new Date().toJSON();
     appData.activityLog.push(activity);
     bindRunningActivityList();
-    localStorage.setItem('gagev', JSON.stringify(appData));
+    localStorage.setItem('kevinfjbecker/wdamtg/appData', JSON.stringify(appData));
   })
   .append('span')
   .classed('glyphicon', true)
@@ -324,7 +337,7 @@ function cancelRunningActivity(d) {
   var a = appData.runningActivities;
   a.splice(a.indexOf(d), 1);
   bindRunningActivityList();
-  localStorage.setItem('gagev', JSON.stringify(appData));
+  localStorage.setItem('kevinfjbecker/wdamtg/appData', JSON.stringify(appData));
 }
 
 ///////////////////////////////////////////////////////////////// log-editor //
@@ -418,14 +431,12 @@ $('#log-modal-save-changes').click(function(){
     start: startTime.toJSON(),
     end: endTime.toJSON()
   };
+  
+  localStorage.setItem('kevinfjbecker/wdamtg/appData', JSON.stringify(appData));
 
   layout();
 
 });
-
-function updatedLogTime() {
-  // todo
-}
 
 function todaysDate() {
   var d = new Date();
