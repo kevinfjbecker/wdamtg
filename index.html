@@ -7,7 +7,8 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link href="http://getbootstrap.com/dist/css/bootstrap.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
 
     <title>wdamtg</title>
   
@@ -106,18 +107,32 @@ svg {
     </div><!-- /.page#quick-add -->
 
     <div id="log-editor" class="container page hidden">
+
+      <button id="log-editor-prev-day" type="button" class="btn btn-default btn-xs">
+        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+      </button>
+      <button id="log-editor-add" type="button" class="btn btn-default btn-xs">
+        <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+      </button>
+      <button id="log-editor-next-day" type="button" class="btn btn-default btn-xs">
+        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+      </button>
+
       <!-- Modal -->
       <div class="modal fade" id="log-editor-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-              <h4 class="modal-title" id="log-modal-activity">Activity</h4>
+
+              <label class="sr-only" for="activity-title-input">Activity Title</label>
+              <input type="text" class="form-control" id="log-modal-activity-title" placeholder="Activity Title">
+
             </div>
             <div class="modal-body">
 
               <form class="form-inline" role="form">
                 <input type='hidden' id='log-modal-activity-index' value='-1'>
+
                 <div class="form-group">
                   <label class="sr-only" for="start-time-input">Start Time</label>
                   <input type="text" class="form-control" id="log-modal-start-time" placeholder="HH:MM">
@@ -141,7 +156,7 @@ svg {
     <div id="data-viewer" class="container page hidden">TODO =)</div><!-- /.page#data-viewer -->
 
     <script src="http://code.jquery.com/jquery.min.js"></script>
-    <script src="http://getbootstrap.com/dist/js/bootstrap.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     <script src="http://d3js.org/d3.v3.min.js"></script>
 
 <script>
@@ -396,7 +411,7 @@ function layout () {
   .on('click', function(d, i){
     var f = d3.time.format('%H:%M');
     $('#log-modal-activity-index').val(i);
-    $('#log-modal-activity').text(d.activity);
+    $('#log-modal-activity-title').text(d.activity);
     $('#log-modal-start-time').val(f(new Date(d.start)));
     $('#log-modal-end-time').val(f(new Date(d.end)));
     $('#log-editor-modal').modal();
@@ -415,16 +430,25 @@ function layout () {
 $('#log-modal-save-changes').click(function(){
 
   var i = $('#log-modal-activity-index').val(),
-      activity = $('#log-modal-activity').text(),
+      activity = $('#log-modal-activity-title').text(),
       start = $('#log-modal-start-time').val(),
       end = $('#log-modal-end-time').val(),
       startHM = /(\d{2})\:(\d{2})/.exec(start),
       endHM = /(\d{2})\:(\d{2})/.exec(end),
-      startTime = new Date(appData.activityLog[i].start),
-      endTime = new Date(appData.activityLog[i].end);
+      startTime = new Date(),
+      endTime = new Date();
 
   startTime.setHours(startHM[1], startHM[2], 0, 0);
   endTime.setHours(endHM[1], endHM[2], 0, 0);
+
+console.log(i);
+
+  if(Number(i) === -1) {
+  	i = appData.activityLog.length;
+  	console.log('what');
+  }
+
+console.log(i);
 
   appData.activityLog[i] = {
     activity: activity,
@@ -437,6 +461,10 @@ $('#log-modal-save-changes').click(function(){
   layout();
 
 });
+
+$('#log-editor-add').click(function(){ $('#log-editor-modal').modal(); })
+$('#log-editor-prev-day').click(function(){console.log('log-editor-prev-day');})
+$('#log-editor-next-day').click(function(){console.log('log-editor-next-day');})
 
 function todaysDate() {
   var d = new Date();
